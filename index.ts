@@ -16,6 +16,7 @@ const publicSubnet = new aws.ec2.Subnet("dev-public-subnet", {
     vpcId: main.id,
     cidrBlock: "10.0.1.0/24",
     availabilityZone: "ap-south-1c",
+    mapPublicIpOnLaunch: true,
     tags: {
         Name: "dev-public-subnet",
     },
@@ -183,3 +184,32 @@ const db = new aws.rds.Instance("deftsourcedb", {
     username: dbUsername,
 }); 
 
+const userData= 
+`#!/bin/bash
+apt-get update
+apt-get install -y cloud-utils apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+apt-get update
+apt-get install -y docker-ce
+usermod -aG docker ubuntu
+
+# Install docker-compose
+curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose 
+mkdir deft-source && cd deft-source
+docker run --name nginx-container -p 80:80 nginx`;
+
+
+const server = new aws.ec2.Instance("dev-server", {
+    instanceType: "t3.large",
+    vpcSecurityGroupIds: [ devSG.id ], // reference the security group resource above
+    ami: "ami-02eb7a4783e7e9317",
+    subnetId: publicSubnet.id,
+ //   associatePublicIpAddress: true,
+    userData: userData
+
+});
