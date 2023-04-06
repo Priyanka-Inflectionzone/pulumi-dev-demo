@@ -113,7 +113,7 @@ const devSG = new aws.ec2.SecurityGroup("dev-sg", {
         fromPort: 80,
         toPort: 80,
         protocol: "tcp",
-        cidrBlocks: [main.cidrBlock],
+        cidrBlocks: ["0.0.0.0/0"],
     },
     {
         description: "Allow SSH",
@@ -210,6 +210,7 @@ const server = new aws.ec2.Instance("dev-server", {
     ami: "ami-02eb7a4783e7e9317",
     subnetId: publicSubnet.id,
  //   associatePublicIpAddress: true,
-    userData: userData
+    userData: userData,
+
 
 });
