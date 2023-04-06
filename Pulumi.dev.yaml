@@ -1,4 +1,4 @@
 config:
   aws:region: ap-south-1
   deft-source-dev-env:dbPassword: password
-  deft-source-dev-env:dbUsername: admin
+  deft-source-dev-env:dbUsername: priya
