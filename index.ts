@@ -120,7 +120,7 @@ const devSG = new aws.ec2.SecurityGroup("dev-sg", {
         fromPort: 22,
         toPort: 22,
         protocol: "tcp",
-        cidrBlocks: [main.cidrBlock],
+        cidrBlocks: ["0.0.0.0/0"],
     }],
     egress: [{
         fromPort: 0,
@@ -201,16 +201,33 @@ usermod -aG docker ubuntu
 curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose 
 mkdir deft-source && cd deft-source
-docker run --name nginx-container -p 80:80 nginx`;
+docker run --name nginx-container -p 80:80 -d nginx`;
 
+let keyName: pulumi.Input<string> | undefined = config.get("keyName");
+const publicKey = config.get("publicKey");
+
+// The privateKey associated with the selected key must be provided (either directly or base64 encoded).
+const privateKey = config.requireSecret("privateKey").apply(key => {
+    if (key.startsWith("-----BEGIN RSA PRIVATE KEY-----")) {
+        return key;
+    } else {
+        return Buffer.from(key, "base64").toString("ascii");
+    }
+});
+
+if (!keyName) {
+    if (!publicKey) {
+        throw new Error("must provide one of `keyName` or `publicKey`");
+    }
+    const key = new aws.ec2.KeyPair("key", { publicKey });
+    keyName = key.keyName;
+}
 
 const server = new aws.ec2.Instance("dev-server", {
     instanceType: "t3.large",
     vpcSecurityGroupIds: [ devSG.id ], // reference the security group resource above
     ami: "ami-02eb7a4783e7e9317",
     subnetId: publicSubnet.id,
- //   associatePublicIpAddress: true,
+    keyName: keyName,
     userData: userData,
-
-
 });
