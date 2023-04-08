@@ -106,7 +106,7 @@ const devSG = new aws.ec2.SecurityGroup("dev-sg", {
         fromPort: 443,
         toPort: 443,
         protocol: "tcp",
-        cidrBlocks: [main.cidrBlock],
+        cidrBlocks: ["0.0.0.0/0"],
     },
     {
         description: "Allow HTTP",
@@ -200,8 +200,13 @@ usermod -aG docker ubuntu
 # Install docker-compose
 curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose 
-mkdir deft-source && cd deft-source
-docker run --name nginx-container -p 80:80 -d nginx`;
+
+# Install git and clone git repository
+apt-get install git
+mkdir Project && cd Project
+sudo git clone https://Priyanka-Inflectionzone:<github_pat>@github.com/Priyanka-Inflectionzone/docker-compose-nginx.git 
+cd docker-compose-nginx
+docker compose up --build -d`;
 
 let keyName: pulumi.Input<string> | undefined = config.get("keyName");
 const publicKey = config.get("publicKey");
