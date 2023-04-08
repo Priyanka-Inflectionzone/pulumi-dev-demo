@@ -204,7 +204,7 @@ chmod +x /usr/local/bin/docker-compose
 # Install git and clone git repository
 apt-get install git
 mkdir Project && cd Project
-sudo git clone https://Priyanka-Inflectionzone:<github_pat>@github.com/Priyanka-Inflectionzone/docker-compose-nginx.git 
+sudo git clone https://<git_username>:<github_pat>@github.com/<git_username>/<repository name>.git 
 cd docker-compose-nginx
 docker compose up --build -d`;
 
